@@ -7,6 +7,9 @@ def MSE(model, X, y):
 def R2(model, X, y):
     return 1 - MSE(model, X, y) / np.var(y)
 
+def ACC(model, X, y):
+    return np.mean(model.predict(X) == y)
+
 #Tests functions
 if __name__ == "__main__":
     #Preparation
@@ -15,7 +18,7 @@ if __name__ == "__main__":
     from sklearn.datasets import load_iris
     from sklearn.datasets import load_boston
 
-    cModel = LogisticRegression()
+    cModel = LogisticRegression(solver='lbfgs', multi_class='auto')
     iris = load_iris()
     cX = iris.data
     cy = iris.target
@@ -41,3 +44,7 @@ if __name__ == "__main__":
     else:
         print('R2: ERROR')
 
+    if(ACC(cModel, cX, cy) == cModel.score(cX, cy)):
+        print('ACC: VALID')
+    else:
+        print('ACC: ERROR')
