@@ -13,7 +13,7 @@ def trainTestEvaluate(model, X, y, costFunc, test_ratio = 0.3):
     test_y = _y[r:]
 
     model.fit(train_X, train_y)
-    return costFunc(model, test_X, test_y)
+    return costFunc(model, train_X, train_y), costFunc(model, test_X, test_y)
 
 def crossValidationEvaluate(model, X, y, costFunc, folds=5):
     data = np.hstack((X, y[:, np.newaxis]))
@@ -22,6 +22,7 @@ def crossValidationEvaluate(model, X, y, costFunc, folds=5):
     _y = np.ravel(data[:, -1])
 
     scores = []
+    trainScores = []
     r = _X.shape[0] // folds
     for i in range(folds):
         train_mask = np.ones_like(y, dtype=bool)
@@ -36,9 +37,10 @@ def crossValidationEvaluate(model, X, y, costFunc, folds=5):
         test_y = _y[np.logical_not(train_mask)]
 
         model.fit(train_X, train_y)
+        trainScores.append(costFunc(model, train_X, train_y))
         scores.append(costFunc(model, test_X, test_y))
-    
-    return scores
+
+    return trainScores, scores
 
 #Testing
 if __name__ == "__main__":
@@ -57,8 +59,8 @@ if __name__ == "__main__":
     scoresTT = []
     scoresCV = []
     for i in range(20):
-        scoresTT.append(trainTestEvaluate(model, X, y, R2))
-        scoresCV.append(np.mean(crossValidationEvaluate(model, X, y, R2)))
+        scoresTT.append(trainTestEvaluate(model, X, y, R2)[1])
+        scoresCV.append(np.mean(crossValidationEvaluate(model, X, y, R2)[1]))
 
     
     print('mean, variance')
